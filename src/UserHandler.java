@@ -28,14 +28,27 @@ public class UserHandler implements HttpHandler {
                 }
             } else if (method.equals("POST") && path.equals("/users")) {
                 User user = gson.fromJson(new InputStreamReader(exchange.getRequestBody()), User.class);
-                UserDAO.save(user);
-                sendResponse(exchange, 201, "{\"message\": \"User created\"}");
+                //*********************************************
+                try {
+                    UserDAO.save(user);
+                    System.out.println("Usuário cadastrado com sucesso!");
+                    sendResponse(exchange, 201, "{\"message\": \"User created\"}");
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Erro no cadastro: " + e.getMessage());
+                    sendResponse(exchange, 403, "{\"message\": \"Forbidden\"}");
+                } catch (Exception e) {
+                    System.out.println("Erro inesperado: " + e.getMessage());
+                    sendResponse(exchange, 403, "{\"message\": \"Forbidden\"}");
+                }
+            //********************************************
             } else if (method.equals("PUT") && path.matches("/users/\\d+")) {
                 int id = Integer.parseInt(path.substring("/users/".length()));
                 User user = gson.fromJson(new InputStreamReader(exchange.getRequestBody()), User.class);
                 user.id = id;
                 UserDAO.update(user);
                 sendResponse(exchange, 200, "{\"message\": \"User updated\"}");
+
+                //*********************************************
             } else if (method.equals("DELETE") && path.matches("/users/\\d+")) {
                 int id = Integer.parseInt(path.substring("/users/".length()));
                 UserDAO.delete(id);
